@@ -611,7 +611,7 @@ async def checkSportCategoryFilter(lin, zgs, gs, user_id, group_num):
 
 
                 if sportCat is None:
-                    continue
+                    msg += f"{last_name} {name} - нет спортивной категории\n\n"
 
                 if sportCat < catfilter:
                     msg += f"{last_name} {name} - спортивная категория не соответствует минимально установленной для работы в группе\n\n"
