@@ -57,6 +57,7 @@ async def check_list(text, user_id):
                 lin = []
                 zgs = []
                 gs = []
+                #print(areas_02[areaindex])
                 if 'Гс.' in areas_02[areaindex]: have_gs = 1
                 if 'Згс.' in areas_02[areaindex]: have_zgs = 1
                 if 'Линейные' in areas_02[areaindex]: have_lin = 1
@@ -79,6 +80,10 @@ async def check_list(text, user_id):
                     lin = re.split(',\s{0,}', area[2])
                     lin.sort()
                     new_text += f'{area[0]}\nГс. {gs}\nЛинейные судьи: {", ".join(lin)}\n\n'
+                elif have_gs == 0 and have_zgs == 0 and have_lin == 1:#
+                    lin = re.split(',\s{0,}', area[1])
+                    lin.sort()
+                    new_text += f'{area[0]}\nЛинейные судьи: {", ".join(lin)}\n\n'
 
 
                 linjud = lin.copy()
@@ -87,13 +92,12 @@ async def check_list(text, user_id):
                     otherjud.pop(0)
                 list_for_group_counter += linjud
 
-
-
                 area_01 = area.copy()
                 area = area[0]
                 #group_num = re.search('Гр.\s{0,}\d+', area)
                 group_num = re.search('\d+.', area[0:5].strip())
                 areas_01.append([area, area_01, areas_02[areaindex], group_num, [[gs], zgs, lin]])
+
                 if group_num is not None:
                     group_num = int(group_num[0].replace('.', '').strip())
                     status = await chairman_queries_02.active_group(active_comp, group_num)
@@ -114,7 +118,6 @@ async def check_list(text, user_id):
                     if k2 != 0 and k2 is not None:
                         const = k2
 
-
                     if groupType == 1:
                         k9, msg = await chairman_queries_02.check_gender_zgs(user_id, zgs)
                         if k9 == 1:
@@ -132,16 +135,22 @@ async def check_list(text, user_id):
                             flag12 = 1
                             s += f'❌Ошибка: {area}:\n{msg}'
 
+                        k = await chairman_queries.check_category_date(otherjud + linjud, user_id)
+                        if k != 0:
+                            flag6 = 1
+                            s += f'❌Ошибка: {area}: {k}\n\n'
+
 
 
                 if '' in otherjud:
                     otherjud = []
 
+                '''
                 k = await chairman_queries.check_category_date(otherjud + linjud, user_id)
                 if k != 0:
                     flag6 = 1
                     s += f'❌Ошибка: {area}: {k}\n\n'
-
+                '''
 
                 k1 = await chairman_queries.check_clubs_match(linjud)
                 if k1 != 0:

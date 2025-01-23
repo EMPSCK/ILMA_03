@@ -611,15 +611,19 @@ async def check_category_date(list, user_id):
                     firstname = ' '.join(k[1::])
                     lastname = k[0]
 
-                cur.execute(f"SELECT SPORT_Category, SPORT_CategoryDate, SPORT_CategoryDateConfirm, DSFARR_Category_Id FROM competition_judges WHERE compId = {active_comp} AND firstName = '{firstname}' AND lastName = '{lastname}'")
+                cur.execute(f"SELECT SPORT_Category, SPORT_CategoryDate, SPORT_CategoryDateConfirm, DSFARR_Category_Id, SPORT_Category_Id FROM competition_judges WHERE compId = {active_comp} AND firstName = '{firstname}' AND lastName = '{lastname}'")
                 info = cur.fetchone()
                 category = info['SPORT_Category']
                 SPORT_CategoryDate = info['SPORT_CategoryDate']
                 SPORT_CategoryDateConfirm = info['SPORT_CategoryDateConfirm']
-                code = info['DSFARR_Category_Id']
+                code = info['SPORT_Category_Id']
                 if code is None:
                     code = 9
+                    problem.append(jud)
+                    continue
+
                 if category == None or SPORT_CategoryDate == None or SPORT_CategoryDateConfirm == None:
+                    problem.append(jud)
                     continue
 
                 if type(SPORT_CategoryDateConfirm) == str and type(SPORT_CategoryDate) == str:
@@ -635,15 +639,15 @@ async def check_category_date(list, user_id):
 
                 a = date2 - CategoryDate
                 a = a.days
-                if code == 5 or code == 4:
+                if code == 2 or code == 3:
                     if a - 365*2 > 0:
                         problem.append(jud)
 
-                elif code == 3:
+                elif code == 1:
                     if a - 365 > 0:
                         problem.append(jud)
 
-                elif code == 6:
+                elif code == 4:
                     if a - 365*4 > 0:
                         problem.append(jud)
 
@@ -1031,10 +1035,12 @@ async def check_min_category(judgesO, jundesL, group_num, compId, area):
 
             if mincat is None:
                 mincat = 0
+                return 0
             else:
                 mincat = mincat['minCategoryId']
                 if mincat is None:
                     mincat = 0
+                    return 0
 
             #Проверка остальных на запреты
             for i in judgesO:

@@ -590,6 +590,7 @@ async def checkSportCategoryFilter(lin, zgs, gs, user_id, group_num):
             else:
                 judges = lin + zgs + [gs]
 
+            judges = lin
             for jud in judges:
 
 
@@ -603,7 +604,6 @@ async def checkSportCategoryFilter(lin, zgs, gs, user_id, group_num):
 
                 cur.execute(f"SELECT * from competition_judges WHERE compId = {compid} and ((lastName2 = '{last_name}' and firstName2 = '{name}') OR (lastName = '{last_name}' and firstName = '{name}'))")
                 ans = cur.fetchone()
-
                 if ans is None:
                     continue
 
@@ -612,6 +612,7 @@ async def checkSportCategoryFilter(lin, zgs, gs, user_id, group_num):
 
                 if sportCat is None:
                     msg += f"{last_name} {name} - нет спортивной категории\n\n"
+                    continue
 
                 if sportCat < catfilter:
                     msg += f"{last_name} {name} - спортивная категория не соответствует минимально установленной для работы в группе\n\n"
@@ -643,3 +644,66 @@ async def set_min_sport_cat(compId, group_num, cat):
     except Exception as e:
         print(e)
         return 0
+
+async def check_sport_cat_for_rep(all_judges, compId, groupNumber, judType):
+    try:
+        conn = pymysql.connect(
+            host=config.host,
+            port=3306,
+            user=config.user,
+            password=config.password,
+            database=config.db_name,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        with conn:
+            all_judges_01 = all_judges.copy()
+            cur = conn.cursor()
+            cur.execute(f"select minCategorySportId from competition_group where compId = {compId} and groupNumber = {groupNumber}")
+            mincat = cur.fetchone()
+            if mincat is None:
+                return all_judges
+            mincat = mincat['minCategorySportId']
+
+            if mincat is None:
+                return all_judges
+
+            cur.execute(f"select date2 from competition where compId = {compId}")
+            date2 = cur.fetchone()
+            date2 = date2['date2']
+            for jud in all_judges:
+                if jud['SPORT_Category_Id'] is None:
+                    all_judges_01.remove(jud)
+
+                elif jud['SPORT_Category_Id'] < mincat and judType == 'l':
+                    all_judges_01.remove(jud)
+                else:
+                    CategoryDate = jud['SPORT_CategoryDate']
+                    CategoryDateConfirm = jud['SPORT_CategoryDateConfirm']
+                    catd = 0
+                    if type(CategoryDate) == str and type(CategoryDateConfirm) == str:
+                        all_judges_01.remove(jud)
+
+                    elif type(CategoryDateConfirm) == str:
+                        catd = CategoryDate
+                    else:
+                        catd = max(CategoryDate, CategoryDateConfirm)
+                    a = date2 - catd
+                    a = a.days
+                    code = jud['SPORT_Category_Id']
+                    if code == 2 or code == 3:
+                        if a - 365 * 2 > 0:
+                            all_judges_01.remove(jud)
+
+                    elif code == 1:
+                        if a - 365 > 0:
+                            all_judges_01.remove(jud)
+
+                    elif code == 4:
+                        if a - 365 * 4 > 0:
+                            all_judges_01.remove(jud)
+        return all_judges_01
+
+
+    except Exception as e:
+        print(e)
+        return all_judges

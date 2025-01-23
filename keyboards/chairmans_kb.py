@@ -190,7 +190,7 @@ async def edit_gen_judegs_markup(groupType, judgeId, judges, compId, json):
         with conn:
             cur = conn.cursor()
             if judges[judgeId][1] == 'l':
-                cur.execute(f"SELECT firstName, lastName, id, DSFARR_Category_Id, SPORT_CategoryDate, SPORT_CategoryDateConfirm, SPORT_Category, RegionId, workCode, Birth from competition_judges WHERE compId = {compId} and active = 1 and workCode <> 3 ")
+                cur.execute(f"SELECT firstName, lastName, id, DSFARR_Category_Id, SPORT_CategoryDate, SPORT_CategoryDateConfirm, SPORT_Category, RegionId, workCode, Birth, SPORT_Category_Id from competition_judges WHERE compId = {compId} and active = 1 and workCode <> 3 ")
                 all_judges = cur.fetchall()
                 if len(all_judges) == 0:
                     but2.append(InlineKeyboardButton(text='Назад', callback_data=f"back_to_generation"))
@@ -229,6 +229,7 @@ async def edit_gen_judegs_markup(groupType, judgeId, judges, compId, json):
 
                 if groupType == 1:
                     all_judges = await chairman_queries_02.age_filter(all_judges, compId)
+                    all_judges = await chairman_queries_02.check_sport_cat_for_rep(all_judges, compId, judges[judgeId][0], 'l')
 
 
 
@@ -259,6 +260,7 @@ async def edit_gen_judegs_markup(groupType, judgeId, judges, compId, json):
                 all_judges = await generation_logic.relatives_filter(compId, all_judges, pull)
                 if groupType == 1:
                     all_judges = await chairman_queries_02.age_filter(all_judges, compId)
+                    all_judges = await chairman_queries_02.check_sport_cat_for_rep(all_judges, compId, judges[judgeId][0], 'z')
 
 
             for j in range(len(all_judges)):

@@ -51,7 +51,7 @@ async def get_ans(data):
     all_judges_list = {}  # преобразуем словарь для более удобной работы, создаем общий список доступных для выбора судей с параметрами
 
     for i in ans:
-        i['SPORT_Category_decoded'] = i['DSFARR_Category_Id'] #await decode_category(i['SPORT_Category'])
+        i['DSFARR_Category_decoded'] = i['DSFARR_Category_Id'] #await decode_category(i['SPORT_Category'])
         all_judges_list[i['id']] = i
 
     all_judges_list_start = dict(sorted(all_judges_list.items(), key=lambda item: item[1]['group_counter']))
@@ -169,9 +169,12 @@ async def get_ans(data):
         """
 
         # определяем параметры группы
-        n_judges, min_category = i[1], i[2]
+        n_judges, min_category, min_category_sport = i[1], i[2], i[6]
         if min_category is None:
             min_category = 0
+
+        if min_category_sport is None:
+            min_category_sport = 0
         #otd_num = group_list[i]['otd_num']
 
         n_judges_category = 0
@@ -187,7 +190,7 @@ async def get_ans(data):
                 n_jud_comp_region, n_jud_other_region = 10000, 10000
 
         group_all_judges_list = await judges_category_filter(group_all_judges_list,
-                                                       min_category)  # 4. удаляем судей с неподходящей категорией
+                                                       min_category, min_category_sport, i[3])  # 4. удаляем судей с неподходящей категорией
 
         black_list_cat = await black_list_convert(group_number,
                                             black_list)  # 5. определяем судей с запретом на судейство в конкретной категории
@@ -298,7 +301,7 @@ async def get_group_params(comp_id, group_id):
         with conn:
             cur = conn.cursor()
             cur.execute(
-                f'''SELECT groupNumber,judges, minCategoryId, sport, zgsNumber, floor
+                f'''SELECT groupNumber,judges, minCategoryId, sport, zgsNumber, floor, minCategorySportId
                  from competition_group
                  WHERE compId = {comp_id} and groupNumber = {group_id}
                                         ''')
@@ -312,7 +315,7 @@ async def get_group_params(comp_id, group_id):
                     data['minCategoryId'] = 0
                 if data['floor'] is None:
                     data['floor'] = 1
-                return data['groupNumber'], data['judges'], data['minCategoryId'], data['sport'], data['zgsNumber'], data['floor']
+                return data['groupNumber'], data['judges'], data['minCategoryId'], data['sport'], data['zgsNumber'], data['floor'], data['minCategorySportId']
     except Exception as e:
         print(e)
         return 0
@@ -423,7 +426,7 @@ async def get_all_judges_yana(compId):
         with conn:
             cur = conn.cursor()
             cur.execute(
-               f"SELECT id, lastName, firstName, SPORT_Category, RegionId, Club, bookNumber, group_counter, DSFARR_Category_Id, workCode, City, gender, floor FROM competition_judges WHERE compId = {compId} and active = 1 and workCode <= 1")  # выбираем только активных на данный момент судей
+               f"SELECT id, lastName, firstName, SPORT_Category, RegionId, Club, bookNumber, group_counter, DSFARR_Category_Id, workCode, City, gender, floor, SPORT_Category_Id FROM competition_judges WHERE compId = {compId} and active = 1 and workCode <= 1")  # выбираем только активных на данный момент судей
             data = cur.fetchall()
             return data
 
@@ -451,13 +454,19 @@ async def decode_category(category_name):
 
 
 #функция удаляет судей с категорией ниже минимальной для группы
-async def judges_category_filter(all_judges_list, min_category):
+async def judges_category_filter(all_judges_list, min_category, min_category_sport, gr_type):
+
     all_judges_list_1 = all_judges_list.copy()
     for i in all_judges_list:
-        if all_judges_list_1[i]['SPORT_Category_decoded'] is None:
-            all_judges_list_1[i]['SPORT_Category_decoded'] = 9
-        if all_judges_list_1[i]['SPORT_Category_decoded'] < min_category:
+        if all_judges_list_1[i]['DSFARR_Category_decoded'] is None:
+            all_judges_list_1[i]['DSFARR_Category_decoded'] = -1
+        if all_judges_list_1[i]['SPORT_Category_Id'] is None:
+            all_judges_list_1[i]['SPORT_Category_Id'] = -1
+        if all_judges_list_1[i]['DSFARR_Category_decoded'] < min_category:
             all_judges_list_1.pop(i, None)
+        if gr_type == 1 and all_judges_list_1[i]['SPORT_Category_Id'] < min_category_sport: #если группа спортивная то проверяем спорткатегорию
+            all_judges_list_1.pop(i, None)
+
     return all_judges_list_1
 
 async def judges_zgs_filter(all_judges_list):
@@ -633,23 +642,27 @@ async def check_category_date(judges, compId):
             for key in judges:
                 jud = judges[key]
                 id = jud['id']
-                cur.execute(f"SELECT SPORT_Category, SPORT_CategoryDate, SPORT_CategoryDateConfirm, DSFARR_Category_Id FROM competition_judges WHERE compId = {compId} AND id = {id}")
+                cur.execute(f"SELECT SPORT_Category, SPORT_CategoryDate, SPORT_CategoryDateConfirm, DSFARR_Category_Id, SPORT_Category_Id FROM competition_judges WHERE compId = {compId} AND id = {id}")
                 info = cur.fetchone()
                 category = info['SPORT_Category']
                 SPORT_CategoryDate = info['SPORT_CategoryDate']
                 SPORT_CategoryDateConfirm = info['SPORT_CategoryDateConfirm']
-                code = info['DSFARR_Category_Id']
+                code = info['SPORT_Category_Id']
                 if code is None:
+                    problem.append(id)
                     code = 9
 
                 if category == None or SPORT_CategoryDate == None or SPORT_CategoryDateConfirm == None:
+                    problem.append(id)
                     continue
 
                 if type(SPORT_CategoryDateConfirm) == str and type(SPORT_CategoryDate) == str:
                     problem.append(id)
                     continue
+
                 elif type(SPORT_CategoryDateConfirm) == str and type(SPORT_CategoryDate) != str:
                     CategoryDate = SPORT_CategoryDate
+
                 elif type(SPORT_CategoryDateConfirm) != str and type(SPORT_CategoryDate) == str:
                     CategoryDate = SPORT_CategoryDateConfirm
                 else:
@@ -657,15 +670,15 @@ async def check_category_date(judges, compId):
 
                 a = date2 - CategoryDate
                 a = a.days
-                if code == 5 or code == 4:
+                if code == 2 or code == 3:
                     if a - 365*2 > 0:
                         problem.append(id)
 
-                elif code == 3:
+                elif code == 1:
                     if a - 365 > 0:
                         problem.append(id)
 
-                elif code == 6:
+                elif code == 4:
                     if a - 365*4 > 0:
                         problem.append(id)
 

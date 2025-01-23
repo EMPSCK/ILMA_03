@@ -186,3 +186,6 @@ async def f2(call, text):
                 else:
                     await call.message.answer('❌Ошибка\nВыбор турниров не согласуется')
 
+
+async def check_sport_for_rep():
+    pass
