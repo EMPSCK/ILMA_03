@@ -1035,12 +1035,12 @@ async def check_min_category(judgesO, jundesL, group_num, compId, area):
 
             if mincat is None:
                 mincat = 0
-                return 0
+                return 1
             else:
                 mincat = mincat['minCategoryId']
                 if mincat is None:
                     mincat = 0
-                    return 0
+                    return 1
 
             #Проверка остальных на запреты
             for i in judgesO:
