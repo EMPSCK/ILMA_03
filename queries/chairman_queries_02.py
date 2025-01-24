@@ -151,6 +151,8 @@ async def set_sex_for_judges(user_id):
 
 
 async def check_gender_zgs(user_id, zgs):
+    if len(zgs) == 0:
+        return 0, ''
     active_comp = await general_queries.get_CompId(user_id)
     try:
         conn = pymysql.connect(
@@ -622,7 +624,6 @@ async def checkSportCategoryFilter(lin, zgs, gs, user_id, group_num):
             else:
                 return 1, msg
     except Exception as e:
-        print(e)
         return 0, ''
         pass
 

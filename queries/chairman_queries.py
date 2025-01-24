@@ -619,7 +619,7 @@ async def check_category_date(list, user_id):
                 code = info['SPORT_Category_Id']
                 if code is None:
                     code = 9
-                    problem.append(jud)
+                    #problem.append(jud)
                     continue
 
                 if category == None or SPORT_CategoryDate == None or SPORT_CategoryDateConfirm == None:
@@ -654,7 +654,7 @@ async def check_category_date(list, user_id):
             if len(problem) == 0:
                 return 0
             else:
-                return f"{', '.join(problem)}: на момент окончания турнира категория недействительна"
+                return f"{', '.join(problem)}: на момент окончания турнира спортивная категория недействительна"
 
     except Exception as e:
         print(e)
@@ -1042,6 +1042,7 @@ async def check_min_category(judgesO, jundesL, group_num, compId, area):
                     mincat = 0
                     return 1
 
+
             #Проверка остальных на запреты
             for i in judgesO:
                 if len(i.split()) == 2:
@@ -1082,6 +1083,7 @@ async def check_min_category(judgesO, jundesL, group_num, compId, area):
                 jud_cat = cur.fetchone()
                 jud_cat = jud_cat['DSFARR_Category_Id']
                 if jud_cat is None:
+                    ans.append(i + f': нет категории фтсарр\n')
                     continue
 
                 if jud_cat < mincat:
