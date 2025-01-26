@@ -584,6 +584,7 @@ async def check_have_tour_date(user_id):
 
 async def check_category_date(list, user_id):
     try:
+        print(list)
         active_comp = await general_queries.get_CompId(user_id)
         ans = ''
         problem =[]

@@ -142,3 +142,17 @@ while i != len(firstList) and j != len(secondList):
             ans.append([max(ff, sf), fl])
             i += 1
 
+
+
+s = "abc"
+t = "ahbgdc"
+
+i, j = 0, 0
+if len(s) > len(t):
+    print(False)
+
+while i != len(s) and j != len(t):
+    if s[i] == t[j]:
+        i += 1
+    j += 1
+

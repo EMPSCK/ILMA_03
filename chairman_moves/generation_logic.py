@@ -455,18 +455,16 @@ async def decode_category(category_name):
 
 #функция удаляет судей с категорией ниже минимальной для группы
 async def judges_category_filter(all_judges_list, min_category, min_category_sport, gr_type):
-
     all_judges_list_1 = all_judges_list.copy()
     for i in all_judges_list:
-        if all_judges_list_1[i]['DSFARR_Category_decoded'] is None:
-            all_judges_list_1[i]['DSFARR_Category_decoded'] = -1
-        if all_judges_list_1[i]['SPORT_Category_Id'] is None:
-            all_judges_list_1[i]['SPORT_Category_Id'] = -1
-        if all_judges_list_1[i]['DSFARR_Category_decoded'] < min_category:
+        if all_judges_list[i]['DSFARR_Category_decoded'] is None:
+            all_judges_list[i]['DSFARR_Category_decoded'] = -1
+        if all_judges_list[i]['SPORT_Category_Id'] is None:
+            all_judges_list[i]['SPORT_Category_Id'] = -1
+        if all_judges_list[i]['DSFARR_Category_decoded'] < min_category:
             all_judges_list_1.pop(i, None)
-        if gr_type == 1 and all_judges_list_1[i]['SPORT_Category_Id'] < min_category_sport: #если группа спортивная то проверяем спорткатегорию
+        if gr_type == 1 and all_judges_list[i]['SPORT_Category_Id'] < min_category_sport: #если группа спортивная то проверяем спорткатегорию
             all_judges_list_1.pop(i, None)
-
     return all_judges_list_1
 
 async def judges_zgs_filter(all_judges_list):

@@ -514,7 +514,6 @@ async def handle_text_message(message: types.Message):
 
         data = {'compId': active_comp, "regionId": regionId, "status": 12, "groupList": group_list}
         ans, json = await generation_logic.get_ans(data)
-
         id_to_group = await generation_logic.unpac_json(json)
         judges = await generation_logic.get_judges_list(json)
         #print(judges, "Генерация")
@@ -532,7 +531,7 @@ async def handle_text_message(message: types.Message):
         #print()
         await message.answer(ans, reply_markup=markup, parse_mode='html')
     except Exception as e:
-        print(e)
+        print(e, 1)
         await message.answer('❌Ошибка')
 
 

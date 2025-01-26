@@ -527,12 +527,12 @@ async def sort_generate_list(json, user_id):
                 text_02.sort()
                 text_03.sort()
                 if len(text_03) != 0:
-                    text_01 = groupName + '.' + '\n' + f'Згс. {", ".join(text_03)}'+ "\n" + f'Линейные судьи: {", ".join(text_02)}'
+                    text_01 = str(groupNumber) + '. ' + groupName + '.' + '\n' + f'Згс. {", ".join(text_03)}'+ "\n" + f'Линейные судьи: {", ".join(text_02)}'
                 else:
-                    text_01 = groupName + '.' + '\n' + f'Линейные судьи: {", ".join(text_02)}'
+                    text_01 = str(groupNumber) + '. ' +  groupName + '.' + '\n' + f'Линейные судьи: {", ".join(text_02)}'
                 text.append(text_01)
 
-            r =  "\n\n".join(text)
+            r = "\n\n".join(text)
             return r
 
 
