@@ -1659,6 +1659,11 @@ async def set_category(compId, groupNumber, code):
         )
         with conn:
             cur = conn.cursor()
+            if code == 8:
+                cur.execute(
+                    f"update competition_group set minCategoryId = NULL where compId = {compId} and groupNumber = {groupNumber}")
+                conn.commit()
+                return 1
             cur.execute(f"update competition_group set minCategoryId = {code} where compId = {compId} and groupNumber = {groupNumber}")
             conn.commit()
             return 1

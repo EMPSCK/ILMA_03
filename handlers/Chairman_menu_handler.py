@@ -754,12 +754,13 @@ class Edit_group_params(StatesGroup):
     ThirdState = State()
     FourState = State()
     FiveState = State()
+    SixState = State()
 
 @router.callback_query(F.data == ('min_group_cat'))
 async def cmd_start(call: types.CallbackQuery, state:FSMContext):
     await state.clear()
     try:
-        await call.message.edit_text("<b>Введите новыйй ид минимальной категории:</b>\n\nПятая: 1\nЧетвертая: 2\nТретья: 3\nВторая: 4\nПервая: 5\nВысшая: 6\nМеждународная: 7", parse_mode='html', reply_markup=chairmans_kb.back_kb)
+        await call.message.edit_text("<b>Введите новыйй ид минимальной категории:</b>\n\nПятая: 1\nЧетвертая: 2\nТретья: 3\nВторая: 4\nПервая: 5\nВысшая: 6\nМеждународная: 7\nНе определено: 8", parse_mode='html', reply_markup=chairmans_kb.back_kb)
         await state.set_state(Edit_group_params.firstState)
     except:
         pass
@@ -772,7 +773,7 @@ async def cmd_start(message: Message, state:FSMContext):
         cat_id = message.text
         await message.delete()
         oldcall = edit_group_info[message.from_user.id]['call']
-        if cat_id not in ['1', '2', '3', '4', '5', '6', '7']:
+        if cat_id not in ['1', '2', '3', '4', '5', '6', '7', '8']:
             await oldcall.message.edit_text('❌Ошибка. Неверный формат данных', reply_markup=scrutineer_kb.back_mark)
             await state.clear()
             return
@@ -925,7 +926,7 @@ async def cmd_start(message: Message, state:FSMContext):
 @router.callback_query(F.data == ('sport_min_cat'))
 async def cmd_start(call: types.CallbackQuery, state:FSMContext):
     try:
-        await call.message.edit_text("<b>Введите новый ид спортивной категории</b>\n\nТретья: 1\nВторая: 2\nПервая: 3\nВсероссийская: 4", parse_mode='html', reply_markup=chairmans_kb.back_kb)
+        await call.message.edit_text("<b>Введите новый ид спортивной категории</b>\n\nТретья: 1\nВторая: 2\nПервая: 3\nВсероссийская: 4\nНе определено: 5", parse_mode='html', reply_markup=chairmans_kb.back_kb)
         await state.set_state(Edit_group_params.FiveState)
     except:
         pass
@@ -938,7 +939,7 @@ async def cmd_start(message: Message, state:FSMContext):
         cat_id = message.text
         await message.delete()
         oldcall = edit_group_info[message.from_user.id]['call']
-        if not cat_id in ['1', '2', '3', '4']:
+        if not cat_id in ['1', '2', '3', '4', '5']:
             await oldcall.message.edit_text('❌Ошибка. Неверный формат данных', reply_markup=scrutineer_kb.back_mark)
             await state.clear()
             return
@@ -946,6 +947,48 @@ async def cmd_start(message: Message, state:FSMContext):
             compId = edit_group_info[use_id]['compId']
             groupNumber = edit_group_info[use_id]['groupNumber']
             status = await chairman_queries_02.set_min_sport_cat(compId, groupNumber, int(cat_id))
+            if status == 1:
+                await state.clear()
+                compId, groupNumber = edit_group_info[message.from_user.id]['compId'], \
+                                      edit_group_info[message.from_user.id]['groupNumber']
+                call = edit_group_info[message.from_user.id]['call']
+                info = await scrutineer_queries.get_group_info(int(compId), int(groupNumber))
+                await call.message.edit_text(f'{info}\n\n📋Выберите параметр', reply_markup=chairmans_kb.edit_group_kb,
+                                             parse_mode='html')
+            else:
+                await state.clear()
+                await oldcall.message.edit_text('❌Ошибка', reply_markup=scrutineer_kb.back_mark)
+            return
+    except Exception as e:
+        print(e)
+        await state.clear()
+        pass
+
+
+@router.callback_query(F.data == ('min_num_of_vk'))
+async def cmd_start(call: types.CallbackQuery, state:FSMContext):
+    try:
+        await call.message.edit_text("<b>Введите минимальное число ВК в линейной бригаде</b>", parse_mode='html', reply_markup=chairmans_kb.back_kb)
+        await state.set_state(Edit_group_params.SixState)
+    except:
+        pass
+
+
+@router.message(Edit_group_params.SixState)
+async def cmd_start(message: Message, state:FSMContext):
+    try:
+        use_id = message.from_user.id
+        cat_id = message.text
+        await message.delete()
+        oldcall = edit_group_info[message.from_user.id]['call']
+        if not(cat_id.isdigit() and int(cat_id) >= 0):
+            await oldcall.message.edit_text('❌Ошибка. Неверный формат данных', reply_markup=scrutineer_kb.back_mark)
+            await state.clear()
+            return
+        else:
+            compId = edit_group_info[use_id]['compId']
+            groupNumber = edit_group_info[use_id]['groupNumber']
+            status = await chairman_queries_02.set_min_vk(compId, groupNumber, int(cat_id))
             if status == 1:
                 await state.clear()
                 compId, groupNumber = edit_group_info[message.from_user.id]['compId'], \

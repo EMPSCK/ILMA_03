@@ -518,4 +518,5 @@ edit_group_b3 = InlineKeyboardButton(text="Количество ЗГС", callbac
 edit_group_b4 = InlineKeyboardButton(text="Тип группы", callback_data='type_of_group')
 edit_group_b5 = InlineKeyboardButton(text="Назад", callback_data='group_edit')
 edit_group_b7 = InlineKeyboardButton(text="Минимальная спортивная категория", callback_data='sport_min_cat')
-edit_group_kb = InlineKeyboardMarkup(inline_keyboard=[[edit_group_b1, edit_group_b7], [edit_group_b2, edit_group_b3], [edit_group_b4, edit_group_b5]])
+edit_group_b8 = InlineKeyboardButton(text="Мин ВК", callback_data='min_num_of_vk')
+edit_group_kb = InlineKeyboardMarkup(inline_keyboard=[[edit_group_b1, edit_group_b7], [edit_group_b2, edit_group_b3], [edit_group_b4, edit_group_b8], [edit_group_b5]])

@@ -642,7 +642,7 @@ async def checkSportCategoryFilter(lin, zgs, gs, user_id, group_num):
                     if sportCat is None:
                         msg += f"{last_name} {name} - нет спортивной категории\n\n"
                         continue
-                    if sportCat < catfilter_zgs:
+                    elif sportCat < catfilter_zgs:
                         msg += f"{last_name} {name} - спортивная категория не соответствует минимально установленной для работы в группе\n\n"
 
             if msg == '':
@@ -666,6 +666,11 @@ async def set_min_sport_cat(compId, group_num, cat):
         )
         with conn:
             cur = conn.cursor()
+            if cat == 5:
+                cur.execute(
+                    f"update competition_group set minCategorySportId = NULL where compId = {compId} and groupNumber = {group_num}")
+                conn.commit()
+                return 1
             cur.execute(f"update competition_group set minCategorySportId = {cat} where compId = {compId} and groupNumber = {group_num}")
             conn.commit()
             return 1
@@ -810,3 +815,22 @@ async def agregate_check_func(gs, zgs, lin, groupNumber, user_id):
         print(e)
         return 0, ''
 
+async def set_min_vk(compId, groupNumber, cat_id):
+    try:
+        conn = pymysql.connect(
+            host=config.host,
+            port=3306,
+            user=config.user,
+            password=config.password,
+            database=config.db_name,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        with conn:
+            cur = conn.cursor()
+            cur.execute(f"update competition_group set minVK = {cat_id} where compId = {compId} and groupNumber = {groupNumber}")
+            conn.commit()
+            return 1
+    except Exception as e:
+        print(e)
+        return -1
+        pass

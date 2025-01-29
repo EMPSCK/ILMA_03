@@ -373,7 +373,7 @@ async def get_group_info(compId, groupNumber):
         )
         with conn:
             cur = conn.cursor()
-            cur.execute(f"SELECT groupName, judges, minCategoryId, zgsNumber, sport, minCategorySportId FROM competition_group WHERE compId = {compId} and groupNumber = {groupNumber}")
+            cur.execute(f"SELECT groupName, judges, minCategoryId, zgsNumber, sport, minCategorySportId, minVK FROM competition_group WHERE compId = {compId} and groupNumber = {groupNumber}")
             a = cur.fetchone()
             if a is None:
                 return 'не определено'
@@ -394,7 +394,13 @@ async def get_group_info(compId, groupNumber):
                 else:
                     d_sport_cat = sport_cat_decode[a['minCategorySportId']]
 
-                return f'<b>{groupNumber}. {a["groupName"]}</b>\nТип: {groupType}\nОграничение на категорию: {d_cat}\nОграничение на спортивную категорию: {d_sport_cat}\nКоличество членов линейной бригады: {a["judges"]}\nКоличество згс: {a["zgsNumber"]}'
+
+                if a['minVK'] is None:
+                    min_vk = 'не определено'
+                else:
+                    min_vk = a['minVK']
+
+                return f'<b>{groupNumber}. {a["groupName"]}</b>\nТип: {groupType}\nОграничение на категорию: {d_cat}\nОграничение на спортивную категорию: {d_sport_cat}\nМинимальное число ВК: {min_vk}\nКоличество членов линейной бригады: {a["judges"]}\nКоличество згс: {a["zgsNumber"]}'
 
     except Exception as e:
         print(e)
