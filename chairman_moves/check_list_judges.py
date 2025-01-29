@@ -13,7 +13,7 @@ async def check_list(text, user_id):
         areas_01 = []
         s = ''
         list_for_group_counter = []
-        flag1, flag2, flag3, flag4, flag5, flag6, flag7, flag8, flag9, flag10, flag11, flag12 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        flag1, flag2, flag3, flag4, flag5, flag6, flag7, flag8, flag9, flag10, flag11, flag12, flag13 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         active_comp = await general_queries.get_CompId(user_id)
         const = await general_queries.get_tournament_lin_const(active_comp)
         judges_free = await general_queries.get_judges_free(active_comp)
@@ -135,22 +135,23 @@ async def check_list(text, user_id):
                             flag12 = 1
                             s += f'❌Ошибка: {area}:\n{msg}'
 
+
                         k = await chairman_queries.check_category_date(otherjud + linjud, user_id)
                         if k != 0:
                             flag6 = 1
                             s += f'❌Ошибка: {area}: {k}\n\n'
 
 
+                        k3, msg = await chairman_queries_02.agregate_check_func(gs, zgs, lin, group_num, user_id)
+                        if k3 != 0:
+                            flag13 = 1
+                            s += f'❌Ошибка: {area}: {msg}\n\n'
+
+
 
                 if '' in otherjud:
                     otherjud = []
 
-                '''
-                k = await chairman_queries.check_category_date(otherjud + linjud, user_id)
-                if k != 0:
-                    flag6 = 1
-                    s += f'❌Ошибка: {area}: {k}\n\n'
-                '''
 
                 k1 = await chairman_queries.check_clubs_match(linjud)
                 if k1 != 0:
@@ -213,7 +214,7 @@ async def check_list(text, user_id):
 
         config.judges_index[user_id] = judges_use
         Chairman_comm_handler.linsets[user_id][0] = new_text[0:-2]
-        if flag1 + flag2 + flag3 + flag4 + flag5 + flag6 + flag7 + flag8 + flag9 + flag10 + flag12 + flag11 == 0:
+        if flag1 + flag2 + flag3 + flag4 + flag5 + flag6 + flag7 + flag8 + flag9 + flag10 + flag12 + flag11 + flag13  == 0:
             for data in areas_01:
                 # Новая логика для двух таблиц
                 group_num = data[3]
@@ -224,7 +225,7 @@ async def check_list(text, user_id):
                     if crew_id != -1:
                         await chairman_queries_02.pull_to_comp_group_jud(user_id, crew_id, data[1], have)
             return (1, s, list_for_group_counter)
-        elif flag4 == 1 and flag1 + flag2 + flag3 + flag5 + flag6 + flag7 + flag8 + flag9 + flag10 + flag11 + flag12== 0:
+        elif flag4 == 1 and flag1 + flag2 + flag3 + flag5 + flag6 + flag7 + flag8 + flag9 + flag10 + flag11 + flag12 + flag13 == 0:
             for data in areas_01:
                 # Новая логика для двух таблиц
                 group_num = data[3]

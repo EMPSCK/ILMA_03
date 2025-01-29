@@ -67,20 +67,21 @@ async def pull_to_comp_group_jud(user_id, crew_id, area, have):
         )
         with conn:
             cur = conn.cursor()
-            for judIndex in range(len(gs)):
-                i = gs[judIndex].split()
-                if len(i) == 2:
-                    lastname, firstname = i
-                else:
-                    lastname = i[0]
-                    firstname = ' '.join(i[1::])
-                ans = await name_to_jud_id(lastname, firstname, active_comp)
-                judge_id = ans['id']
-                skateId = ans['skateId']
-                ident = f'Гл. судья'
-                sql = "INSERT INTO competition_group_judges (`crewId`, `typeId`, `ident`, `lastName`, `firstName`, `judgeId`, `skateId`) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-                cur.execute(sql, (crew_id, 2, ident, lastname, firstname, judge_id, skateId))
-                conn.commit()
+            if gs != [[]]:
+                for judIndex in range(len(gs)):
+                    i = gs[judIndex].split()
+                    if len(i) == 2:
+                        lastname, firstname = i
+                    else:
+                        lastname = i[0]
+                        firstname = ' '.join(i[1::])
+                    ans = await name_to_jud_id(lastname, firstname, active_comp)
+                    judge_id = ans['id']
+                    skateId = ans['skateId']
+                    ident = f'Гл. судья'
+                    sql = "INSERT INTO competition_group_judges (`crewId`, `typeId`, `ident`, `lastName`, `firstName`, `judgeId`, `skateId`) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+                    cur.execute(sql, (crew_id, 2, ident, lastname, firstname, judge_id, skateId))
+                    conn.commit()
 
             for judIndex in range(len(zgs)):
                 i = zgs[judIndex].split()
@@ -408,7 +409,12 @@ async def check_age_cat(user_id, lin, zgs, gs):
         )
         with conn:
             cur = conn.cursor()
-            for jud in lin + zgs + [gs]:
+            if len(gs) == 0:
+                judges = lin + zgs
+            else:
+                judges = lin + zgs + [gs]
+
+            for jud in judges:
                 i = jud.split()
                 if len(i) == 2:
                     last_name, name = i
@@ -577,14 +583,19 @@ async def checkSportCategoryFilter(lin, zgs, gs, user_id, group_num):
         )
         with conn:
             cur = conn.cursor()
-            cur.execute(f"select minCategorySportId from competition_group where groupNumber = {group_num} and compId = {compid}")
+            cur.execute(f"select minCategorySportId, minCategoryZGSSportId  from competition_group where groupNumber = {group_num} and compId = {compid}")
             catfilter = cur.fetchone()
             if catfilter is None:
                 return 0, ''
 
+
+            catfilter_zgs = catfilter['minCategoryZGSSportId']
             catfilter = catfilter['minCategorySportId']
-            if catfilter is None:
+
+
+            if catfilter is None and catfilter_zgs is None:
                 return 0, ''
+
 
             encoder = await getSportCategoryEncoder()
             if len(gs) == 0:
@@ -592,38 +603,54 @@ async def checkSportCategoryFilter(lin, zgs, gs, user_id, group_num):
             else:
                 judges = lin + zgs + [gs]
 
-            judges = lin
-            for jud in judges:
 
-
+            for jud in lin:
                 i = jud.split()
                 if len(i) == 2:
                     last_name, name = i
                 else:
                     last_name = i[0]
                     name = ' '.join(i[1::])
-
-
                 cur.execute(f"SELECT * from competition_judges WHERE compId = {compid} and ((lastName2 = '{last_name}' and firstName2 = '{name}') OR (lastName = '{last_name}' and firstName = '{name}'))")
                 ans = cur.fetchone()
                 if ans is None:
                     continue
 
                 sportCat = ans['SPORT_Category_Id']
-
-
                 if sportCat is None:
                     msg += f"{last_name} {name} - нет спортивной категории\n\n"
                     continue
-
                 if sportCat < catfilter:
                     msg += f"{last_name} {name} - спортивная категория не соответствует минимально установленной для работы в группе\n\n"
+
+
+            if zgs != [] and catfilter_zgs is not None:
+                for jud in zgs:
+                    i = jud.split()
+                    if len(i) == 2:
+                        last_name, name = i
+                    else:
+                        last_name = i[0]
+                        name = ' '.join(i[1::])
+                    cur.execute(
+                        f"SELECT * from competition_judges WHERE compId = {compid} and ((lastName2 = '{last_name}' and firstName2 = '{name}') OR (lastName = '{last_name}' and firstName = '{name}'))")
+                    ans = cur.fetchone()
+                    if ans is None:
+                        continue
+
+                    sportCat = ans['SPORT_Category_Id']
+                    if sportCat is None:
+                        msg += f"{last_name} {name} - нет спортивной категории\n\n"
+                        continue
+                    if sportCat < catfilter_zgs:
+                        msg += f"{last_name} {name} - спортивная категория не соответствует минимально установленной для работы в группе\n\n"
 
             if msg == '':
                 return 0, ''
             else:
                 return 1, msg
     except Exception as e:
+        print(e, 67)
         return 0, ''
         pass
 
@@ -708,3 +735,78 @@ async def check_sport_cat_for_rep(all_judges, compId, groupNumber, judType):
     except Exception as e:
         print(e)
         return all_judges
+
+
+async def get_group_params(compId, groupNumber):
+    try:
+        conn = pymysql.connect(
+            host=config.host,
+            port=3306,
+            user=config.user,
+            password=config.password,
+            database=config.db_name,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        with conn:
+            cur = conn.cursor()
+            cur.execute(f"select * from competition_group where compId = {compId} and groupNumber = {groupNumber}")
+            ans = cur.fetchone()
+            if ans is None:
+                return -1
+
+            return ans
+    except:
+        return -1
+
+async def agregate_check_func(gs, zgs, lin, groupNumber, user_id):
+    try:
+        msg = ''
+        flag = 0
+        conn = pymysql.connect(
+            host=config.host,
+            port=3306,
+            user=config.user,
+            password=config.password,
+            database=config.db_name,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        lin_vk_count = 0
+        compId = await general_queries.get_CompId(user_id)
+        group_params = await get_group_params(compId, groupNumber)
+        if group_params == -1:
+            return 0, ''
+
+        with conn:
+            cur = conn.cursor()
+            if lin != []:
+                for jud in lin:
+                    i = jud.split()
+                    if len(i) == 2:
+                        last_name, name = i
+                    else:
+                        last_name = i[0]
+                        name = ' '.join(i[1::])
+                    cur.execute(
+                        f"SELECT * from competition_judges WHERE compId = {compId} and ((lastName2 = '{last_name}' and firstName2 = '{name}') OR (lastName = '{last_name}' and firstName = '{name}'))")
+                    ans = cur.fetchone()
+                    if ans is None:
+                        continue
+
+                    if ans['SPORT_Category_Id'] == 4:
+                        lin_vk_count += 1
+
+            min_vk = group_params['minVK']
+            if min_vk is None:
+                min_vk = 0
+
+            if lin_vk_count < min_vk:
+                msg += f'Минимальное число линейных судей с всероссийской категорией - {min_vk}, в группе - {lin_vk_count}'
+                flag = 1
+
+
+            return flag, msg
+
+    except Exception as e:
+        print(e)
+        return 0, ''
+
