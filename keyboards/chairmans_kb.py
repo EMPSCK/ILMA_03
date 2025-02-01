@@ -198,6 +198,7 @@ async def edit_gen_judegs_markup(groupType, judgeId, judges, compId, json):
                     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
                 all_judges = await generation_logic.same_judges_filter(all_judges, list(judges.keys()))
+
                 all_judges = await generation_logic.interdiction_filter(compId, judges[judgeId][0], all_judges)
 
 
@@ -214,6 +215,7 @@ async def edit_gen_judegs_markup(groupType, judgeId, judges, compId, json):
                 lin_neibors_list.remove(judgeId)
                 lin_neibors_clubs_list = await chairman_queries.get_lin_neibors_clubs(lin_neibors_list)
                 all_judges = await generation_logic.distinct_clubs_filter(lin_neibors_clubs_list, all_judges)
+
                 all_judges = await generation_logic.interdiction_filter(compId, judges[judgeId][0], all_judges)
 
 
@@ -229,6 +231,7 @@ async def edit_gen_judegs_markup(groupType, judgeId, judges, compId, json):
 
                 if groupType == 1:
                     all_judges = await chairman_queries_02.age_filter(all_judges, compId)
+
                     all_judges = await chairman_queries_02.check_sport_cat_for_rep(all_judges, compId, judges[judgeId][0], 'l')
 
 
@@ -293,6 +296,7 @@ async def edit_gen_judegs_markup(groupType, judgeId, judges, compId, json):
 
 
 async def edit_gen_judegs_markup_01(groupType, judgeId, judges, compId, json):
+    print(groupType, judgeId, judges, compId, json)
     try:
         buttons = []
         but2 = []
@@ -316,21 +320,26 @@ async def edit_gen_judegs_markup_01(groupType, judgeId, judges, compId, json):
                     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
                 all_judges = await generation_logic.same_judges_filter(all_judges, list(judges.keys()))
+                print(all_judges, len(all_judges))
                 all_judges = await generation_logic.interdiction_filter(compId, judges[judgeId][0], all_judges)
+                print(all_judges, len(all_judges))
                 pull = json[judges[judgeId][0]]['lin_id'] + json[judges[judgeId][0]]['zgs_id']
                 pull.remove(judgeId)
                 all_judges = await generation_logic.relatives_filter(compId, all_judges, pull)
-
+                print(all_judges, len(all_judges))
 
                 minCategoryId = await chairman_queries.get_min_catId(compId, judges[judgeId][0])
                 all_judges = await generation_logic.category_filter(all_judges, minCategoryId, compId, groupType, 'l')
-
+                print(all_judges, len(all_judges))
 
                 lin_neibors_list = judges[judgeId][2].copy()
                 lin_neibors_list.remove(judgeId)
                 lin_neibors_clubs_list = await chairman_queries.get_lin_neibors_clubs(lin_neibors_list)
+
                 all_judges = await generation_logic.distinct_clubs_filter(lin_neibors_clubs_list, all_judges)
+                print(all_judges, len(all_judges))
                 all_judges = await generation_logic.interdiction_filter(compId, judges[judgeId][0], all_judges)
+                print(all_judges, len(all_judges))
 
 
             if judges[judgeId][1] == 'z':

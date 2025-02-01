@@ -474,6 +474,7 @@ async def age_filter(all_judges, compId):
         for jud in all_judges:
             date = jud['Birth']
             if date is None or type(date) == str:
+                all_judges_01.append(jud)
                 continue
 
             age = date2.year - date.year
@@ -650,7 +651,7 @@ async def checkSportCategoryFilter(lin, zgs, gs, user_id, group_num):
             else:
                 return 1, msg
     except Exception as e:
-        print(e, 67)
+        print(e, 'checkSportCategoryFilter')
         return 0, ''
         pass
 
@@ -812,7 +813,7 @@ async def agregate_check_func(gs, zgs, lin, groupNumber, user_id):
             return flag, msg
 
     except Exception as e:
-        print(e)
+        print(e, 'agregate_check_func')
         return 0, ''
 
 async def set_min_vk(compId, groupNumber, cat_id):

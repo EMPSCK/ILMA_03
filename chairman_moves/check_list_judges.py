@@ -97,7 +97,6 @@ async def check_list(text, user_id):
                 #group_num = re.search('Гр.\s{0,}\d+', area)
                 group_num = re.search('\d+.', area[0:5].strip())
                 areas_01.append([area, area_01, areas_02[areaindex], group_num, [[gs], zgs, lin]])
-
                 if group_num is not None:
                     group_num = int(group_num[0].replace('.', '').strip())
                     status = await chairman_queries_02.active_group(active_comp, group_num)
@@ -157,6 +156,7 @@ async def check_list(text, user_id):
                 if k1 != 0:
                     s += f'❌Ошибка: {area}: Распределение линейной группы по клубам нарушает регламент\n{k1}\n'
                     flag5 = 1
+
 
                 # Проверяем количество линейных
                 if len(linjud) != const:

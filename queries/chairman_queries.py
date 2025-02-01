@@ -540,6 +540,10 @@ async def check_clubs_match(list):
                 cur = conn.cursor()
                 cur.execute(f"SELECT Club, City FROM competition_judges WHERE firstName = '{firstname}' AND lastName = '{lastname}'")
                 info = cur.fetchone()
+                if info is None:
+                    print(jud)
+                    continue
+
                 club, city = info['Club'], info['City']
 
                 if club != None and city != None:
@@ -557,7 +561,7 @@ async def check_clubs_match(list):
                 return ans
 
     except Exception as e:
-        print(e, 1)
+        print(e, 'clubs_match')
         return 0
 
 
@@ -613,6 +617,8 @@ async def check_category_date(list, user_id):
 
                 cur.execute(f"SELECT SPORT_Category, SPORT_CategoryDate, SPORT_CategoryDateConfirm, DSFARR_Category_Id, SPORT_Category_Id FROM competition_judges WHERE compId = {active_comp} AND firstName = '{firstname}' AND lastName = '{lastname}'")
                 info = cur.fetchone()
+                if info is None:
+                    continue
                 category = info['SPORT_Category']
                 SPORT_CategoryDate = info['SPORT_CategoryDate']
                 SPORT_CategoryDateConfirm = info['SPORT_CategoryDateConfirm']
@@ -657,7 +663,7 @@ async def check_category_date(list, user_id):
                 return f"{', '.join(problem)}: на момент окончания турнира спортивная категория недействительна"
 
     except Exception as e:
-        print(e)
+        print(e, 'category_date')
         return 0
 
 
