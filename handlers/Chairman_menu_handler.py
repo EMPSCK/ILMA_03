@@ -1005,3 +1005,77 @@ async def cmd_start(message: Message, state:FSMContext):
         print(e)
         await state.clear()
         pass
+
+
+@router.callback_query(F.data == ('EditJudges'))
+async def cmd_start(call: types.CallbackQuery):
+    try:
+        compId = await general_queries.get_CompId(call.from_user.id)
+        if compId == 0:
+            return await call.message.edit_text('❌Ошибка. Необходимо задать активное соревнование', reply_markup=chairmans_kb.back_kb)
+        is_active = await general_queries.active_or_not(compId)
+        if is_active != 1:
+            return await call.message.edit_text('❌Ошибка. Выбранное соревнование неактивно', reply_markup=chairmans_kb.back_kb)
+
+        markup = await chairmans_kb.get_edit_judges_params_mark(compId, call.from_user.id)
+        await call.message.edit_text('👨‍⚖️Выберите судью для редактирования', reply_markup=markup)
+    except:
+        pass
+
+judges_edit = {}
+@router.callback_query(F.data.startswith('EDIT_JUD_'))
+async def cmd_start(call: types.CallbackQuery):
+    judId = int(call.data.replace('EDIT_JUD_', ''))
+    judges_edit[call.from_user.id] = judId
+    info =await chairman_queries_02.get_jud_info(judId)
+    await call.message.edit_text(info, reply_markup=chairmans_kb.edit_jud_r_kb)
+
+
+@router.callback_query(F.data == ('GS'))
+async def cmd_start(call: types.CallbackQuery):
+    try:
+        judId = judges_edit[call.from_user.id]
+        status = await chairman_queries_02.change_sp(judId, 1)
+        if status != 1:
+            return await call.answer("❌Ошибка")
+        info = await chairman_queries_02.get_jud_info(judId)
+        await call.message.edit_text(info, reply_markup=chairmans_kb.edit_jud_r_kb)
+    except Exception as e:
+        pass
+
+@router.callback_query(F.data == ('ZGS'))
+async def cmd_start(call: types.CallbackQuery):
+    try:
+        judId = judges_edit[call.from_user.id]
+        status = await chairman_queries_02.change_sp(judId, 2)
+        if status != 1:
+            return await call.answer("❌Ошибка")
+        info = await chairman_queries_02.get_jud_info(judId)
+        await call.message.edit_text(info, reply_markup=chairmans_kb.edit_jud_r_kb)
+    except Exception as e:
+        pass
+
+@router.callback_query(F.data == ('LINJUD'))
+async def cmd_start(call: types.CallbackQuery):
+    try:
+        judId = judges_edit[call.from_user.id]
+        status = await chairman_queries_02.change_sp(judId, 0)
+        if status != 1:
+            return await call.answer("❌Ошибка")
+        info = await chairman_queries_02.get_jud_info(judId)
+        await call.message.edit_text(info, reply_markup=chairmans_kb.edit_jud_r_kb)
+    except Exception as e:
+        pass
+
+@router.callback_query(F.data == ('SPU'))
+async def cmd_start(call: types.CallbackQuery):
+    try:
+        judId = judges_edit[call.from_user.id]
+        status = await chairman_queries_02.change_sp(judId, 3)
+        if status != 1:
+            return await call.answer("❌Ошибка")
+        info = await chairman_queries_02.get_jud_info(judId)
+        await call.message.edit_text(info, reply_markup=chairmans_kb.edit_jud_r_kb)
+    except Exception as e:
+        pass
+

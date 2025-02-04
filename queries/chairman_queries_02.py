@@ -835,3 +835,71 @@ async def set_min_vk(compId, groupNumber, cat_id):
         print(e)
         return -1
         pass
+
+
+
+async def get_jud_info(judId):
+    try:
+        conn = pymysql.connect(
+            host=config.host,
+            port=3306,
+            user=config.user,
+            password=config.password,
+            database=config.db_name,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        with conn:
+            cur = conn.cursor()
+            cur.execute(f"select * from competition_judges where id = {judId}")
+            ans = cur.fetchone()
+            if ans is None:
+                return 'не найден'
+
+            ftsarr_cat = ans['DSFARR_Category']
+            if ftsarr_cat is None:
+                ftsarr_cat = 'не определено'
+            sport_cat = ans['SPORT_Category']
+            if sport_cat is None:
+                sport_cat = 'не определено'
+            city = ans['City']
+            if city is None:
+                city = 'не определено'
+            club = ans['Club']
+            if club is None:
+                club = 'не определено'
+            firstName = ans['firstName']
+            if firstName is None:
+                firstName = 'не определено'
+            lastName = ans['lastName']
+            if lastName is None:
+                lastName = 'не определено'
+
+            workCode = ans['workCode']
+            code_enc = {0: "Линейный судья", 1: "Гс", 2: "Згс", 3: "Спу"}
+
+
+            return f'👨‍⚖️{lastName} {firstName}\nГород: {city}\nКлуб: {club}\nКатегория фтсарр: {ftsarr_cat}\nСпортивная категория: {sport_cat}\nРоль на площадке: {code_enc[workCode]}'
+    except Exception as e:
+        print(e)
+        return '❌Ошибка'
+        pass
+
+async def change_sp(judgeId, code):
+    try:
+        conn = pymysql.connect(
+            host=config.host,
+            port=3306,
+            user=config.user,
+            password=config.password,
+            database=config.db_name,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        with conn:
+            cur = conn.cursor()
+            cur.execute(f"update competition_judges set workCode = {code} where id = {judgeId}")
+            conn.commit()
+            return 1
+    except Exception as e:
+        print(e)
+        return -1
+        pass

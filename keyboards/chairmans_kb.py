@@ -53,7 +53,8 @@ book_number_kb = InlineKeyboardMarkup(inline_keyboard=[book_number_button])
 menu_button = [InlineKeyboardButton(text='Задать активное соревнование', callback_data='set_active_competition')]
 menu_button_01 = [InlineKeyboardButton(text='Ввести код', callback_data='enter_chairaman_pin')]
 menu_button_02 = [InlineKeyboardButton(text='Редактировать параметры групп', callback_data='group_edit')]
-menu_kb = InlineKeyboardMarkup(inline_keyboard=[menu_button, menu_button_02, menu_button_01])
+menu_button_03 = [InlineKeyboardButton(text='Редактировать параметры судей', callback_data='EditJudges')]
+menu_kb = InlineKeyboardMarkup(inline_keyboard=[menu_button, menu_button_01, menu_button_02, menu_button_03])
 
 back_kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Вернуться к меню', callback_data='back_b')]])
 
@@ -513,7 +514,7 @@ async def get_edit_group_kb(user_id, compId):
                 b = [InlineKeyboardButton(text='Назад', callback_data=f"back_b")]
                 buttons.append(b)
             else:
-                but2.append(InlineKeyboardButton(text='Назад', callback_data=f"back_b "))
+                but2.append(InlineKeyboardButton(text='Назад', callback_data=f"back_b"))
                 buttons.append(but2)
 
             return InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -529,3 +530,48 @@ edit_group_b5 = InlineKeyboardButton(text="Назад", callback_data='group_edi
 edit_group_b7 = InlineKeyboardButton(text="Минимальная спортивная категория", callback_data='sport_min_cat')
 edit_group_b8 = InlineKeyboardButton(text="Мин ВК", callback_data='min_num_of_vk')
 edit_group_kb = InlineKeyboardMarkup(inline_keyboard=[[edit_group_b1, edit_group_b7], [edit_group_b2, edit_group_b3], [edit_group_b4, edit_group_b8], [edit_group_b5]])
+
+
+
+async def get_edit_judges_params_mark(compId, user_id):
+    try:
+        buttons = []
+        but2 = []
+        conn = pymysql.connect(
+            host=config.host,
+            port=3306,
+            user=config.user,
+            password=config.password,
+            database=config.db_name,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        with conn:
+            cur = conn.cursor()
+            cur.execute(
+                f"select firstName, lastName, id from competition_judges where compId = {compId}")
+            group_list = cur.fetchall()
+            for j in range(len(group_list)):
+                but2.append(InlineKeyboardButton(text=f'{group_list[j]["lastName"]} {group_list[j]["firstName"]}',
+                                                 callback_data=f'EDIT_JUD_{group_list[j]["id"]}'))
+                if j % 2 != 0:
+                    buttons.append(but2)
+                    but2 = []
+
+            if len(but2) == 0:
+                b = [InlineKeyboardButton(text='Назад', callback_data=f"back_b")]
+                buttons.append(b)
+            else:
+                but2.append(InlineKeyboardButton(text='Назад', callback_data=f"back_b"))
+                buttons.append(but2)
+
+            return InlineKeyboardMarkup(inline_keyboard=buttons)
+    except:
+        pass
+
+edit_jud_r_b5 = InlineKeyboardButton(text="Главный судья", callback_data='GS')
+edit_jud_r_b7 = InlineKeyboardButton(text="Заместитель главного судьи", callback_data='ZGS')
+edit_jud_r_b8 = InlineKeyboardButton(text="Линейный судья", callback_data='LINJUD')
+edit_jud_r_b10 = InlineKeyboardButton(text="Судья при участниках", callback_data='SPU')
+edit_jud_r_b9 = [InlineKeyboardButton(text="Назад", callback_data='EditJudges')]
+edit_jud_r_kb = InlineKeyboardMarkup(inline_keyboard=[[edit_jud_r_b5, edit_jud_r_b7], [edit_jud_r_b8, edit_jud_r_b10], edit_jud_r_b9])
+

@@ -117,42 +117,29 @@ def bubble_sort(arr):
                 arr[j], arr[j+1] = arr[j+1], arr[j]
     return arr
 
-firstList = [[3,10]]
-secondList = [[5,10]]
-ans = []
-i, j = 0, 0
-while i != len(firstList) and j != len(secondList):
-    ff, fl = firstList[i]
-    sf, sl = secondList[j]
+a = [1, 2, 3, 4, 5, 5, 5, 5, 8, 9, 10]
+#Если элемента нет, то выводит индекс первого элемента больше данного
+def lbs(a, x):
+    l = -1
+    r = len(a) - 1
+    while l + 1 != r:
+        c = (l + r)//2
+        if a[c] < x:
+            l = c
+        else:
+            r = c
+    return r
 
-    if ff > sl:
-        j += 1
-    elif sf > fl:
-        i += 1
-    else:
-        if ff == sf and fl == sl:
-            ans.append([ff, fl])
-            i += 1
-            j += 1
+#Если элемента нет, то дает индекс последнего элемента меньше данного
+def rbs(a, x):
+    l = 0
+    r = len(a) - 1
+    while l + 1 != r:
+        c = (l + r) // 2
+        if a[c] > x:
+            r = c
+        else:
+            l = c
+    return l
 
-        elif fl >= sl:
-            ans.append([max(ff, sf), sl])
-            j += 1
-        elif sl > fl:
-            ans.append([max(ff, sf), fl])
-            i += 1
-
-
-
-s = "abc"
-t = "ahbgdc"
-
-i, j = 0, 0
-if len(s) > len(t):
-    print(False)
-
-while i != len(s) and j != len(t):
-    if s[i] == t[j]:
-        i += 1
-    j += 1
 

@@ -195,7 +195,7 @@ async def get_cal_menu(callback: types.CallbackQuery):
         if await chairman_queries.del_unactive_comp(callback.from_user.id, active_comp) == 1:
             active_comp = None
         info = await general_queries.CompId_to_name(active_comp)
-        return f"👋Добро пожаловать в scrutineer интерфейс бота SS6\n\n/help - список всех команд\nАктивное соревнование: {info}", 3
+        return f"👋Добро пожаловать в chairman интерфейс бота SS6\n\n/help - список всех команд\nАктивное соревнование: {info}", 3
 
     if user_status == 0:
         return "👋Добро пожаловать в интерфейс бота SS6\n\nДля начала работы необходимо пройти регистрацию в системе\nВыберите роль:", 0
