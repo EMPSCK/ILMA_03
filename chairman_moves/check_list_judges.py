@@ -58,7 +58,7 @@ async def check_list(text, user_id):
                 zgs = []
                 gs = []
                 #print(areas_02[areaindex])
-                if 'Гс.' in areas_02[areaindex]: have_gs = 1
+                if 'Гс.' in areas_02[areaindex] : have_gs = 1
                 if 'Згс.' in areas_02[areaindex]: have_zgs = 1
                 if 'Линейные' in areas_02[areaindex]: have_lin = 1
 

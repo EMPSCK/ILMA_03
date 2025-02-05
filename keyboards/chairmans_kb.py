@@ -50,11 +50,11 @@ book_number_button = [InlineKeyboardButton(text='Назад', callback_data='bac
 book_number_kb = InlineKeyboardMarkup(inline_keyboard=[book_number_button])
 
 
-menu_button = [InlineKeyboardButton(text='Задать активное соревнование', callback_data='set_active_competition')]
-menu_button_01 = [InlineKeyboardButton(text='Ввести код', callback_data='enter_chairaman_pin')]
-menu_button_02 = [InlineKeyboardButton(text='Редактировать параметры групп', callback_data='group_edit')]
-menu_button_03 = [InlineKeyboardButton(text='Редактировать параметры судей', callback_data='EditJudges')]
-menu_kb = InlineKeyboardMarkup(inline_keyboard=[menu_button, menu_button_01, menu_button_02, menu_button_03])
+menu_button = InlineKeyboardButton(text='Задать активное соревнование', callback_data='set_active_competition')
+menu_button_01 = InlineKeyboardButton(text='Ввести код', callback_data='enter_chairaman_pin')
+menu_button_02 = InlineKeyboardButton(text='Редактировать параметры групп', callback_data='group_edit')
+menu_button_03 = InlineKeyboardButton(text='Редактировать параметры судей', callback_data='EditJudges')
+menu_kb = InlineKeyboardMarkup(inline_keyboard=[[menu_button], [menu_button_02], [menu_button_03], [menu_button_01]])
 
 back_kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Вернуться к меню', callback_data='back_b')]])
 
@@ -297,7 +297,6 @@ async def edit_gen_judegs_markup(groupType, judgeId, judges, compId, json):
 
 
 async def edit_gen_judegs_markup_01(groupType, judgeId, judges, compId, json):
-    print(groupType, judgeId, judges, compId, json)
     try:
         buttons = []
         but2 = []
@@ -548,10 +547,11 @@ async def get_edit_judges_params_mark(compId, user_id):
         with conn:
             cur = conn.cursor()
             cur.execute(
-                f"select firstName, lastName, id from competition_judges where compId = {compId}")
+                f"select firstName, lastName, id, workCode from competition_judges where compId = {compId}")
             group_list = cur.fetchall()
+            encoder = {0: '(Лс)', 1:'(Гс)', 2:'(Згс)', 3:'(Спу)'}
             for j in range(len(group_list)):
-                but2.append(InlineKeyboardButton(text=f'{group_list[j]["lastName"]} {group_list[j]["firstName"]}',
+                but2.append(InlineKeyboardButton(text=f'{encoder[group_list[j]["workCode"]]}{group_list[j]["lastName"]} {group_list[j]["firstName"]}',
                                                  callback_data=f'EDIT_JUD_{group_list[j]["id"]}'))
                 if j % 2 != 0:
                     buttons.append(but2)

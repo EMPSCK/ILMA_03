@@ -142,4 +142,9 @@ def rbs(a, x):
             l = c
     return l
 
-
+import re
+b = 'мамамамамамам Гсвсвс ывсысвыс'
+if re.search('Гс\.*\s+', b):
+    print(1)
+else:
+    print(2)
