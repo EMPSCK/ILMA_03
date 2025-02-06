@@ -1025,4 +1025,3 @@ async def regions_change_filter(all_judges, info, regions, compRegion):
                 if regions[jud_region] >= neibor:
                     all_judges_01.remove(jud)
     return all_judges_01
-
