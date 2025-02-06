@@ -54,6 +54,7 @@ async def get_ans(data):
         i['DSFARR_Category_decoded'] = i['DSFARR_Category_Id'] #await decode_category(i['SPORT_Category'])
         all_judges_list[i['id']] = i
 
+
     all_judges_list_start = dict(sorted(all_judges_list.items(), key=lambda item: item[1]['group_counter']))
     all_zgs_list_start = await judges_zgs_filter(all_judges_list)  # доступные згс из базы
 
@@ -752,6 +753,7 @@ async def distinct_clubs_filter(clubs_list, all_judges):
         return all_judges_01
     except Exception as e:
         return -1
+
 
 async def category_filter(all_judges, minCategoryId, compId, groupType, judgeType):
     all_judges_01 = all_judges.copy()

@@ -143,7 +143,6 @@ def rbs(a, x):
     return l
 
 import re
-b = 'мамамамамамам Гсвсвс Гсывсысвыс'
 b1 = re.split('Гс.?\s{1,}', b)
 print(b1)
 print(re.search('Гс.?\s{1,}', b))

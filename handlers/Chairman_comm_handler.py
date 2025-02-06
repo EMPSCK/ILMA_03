@@ -651,9 +651,9 @@ async def cmd_start(call: types.CallbackQuery):
     compId = generation_results[call.from_user.id]['compId']
     json = generation_results[call.from_user.id]['json']
     #print(generation_results[call.from_user.id]['judges'])
-    print(1)
+
     markup = await chairmans_kb.edit_gen_judegs_markup(groupType, int(judgeId), judges, compId, json)
-    print(4)
+
     await call.message.edit_text('👨‍⚖️' + lastname + ' ' + firstname + "\n" + "\n" + "Выберите судью для замены:",
                                  reply_markup=markup)
 

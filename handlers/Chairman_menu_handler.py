@@ -1035,7 +1035,7 @@ async def cmd_start(call: types.CallbackQuery):
 async def cmd_start(call: types.CallbackQuery):
     try:
         judId = judges_edit[call.from_user.id]
-        status = await chairman_queries_02.change_sp(judId, 1)
+        status = await chairman_queries_02.change_sp(judId, 2)
         if status != 1:
             return await call.answer("❌Ошибка")
         info = await chairman_queries_02.get_jud_info(judId)
@@ -1047,7 +1047,7 @@ async def cmd_start(call: types.CallbackQuery):
 async def cmd_start(call: types.CallbackQuery):
     try:
         judId = judges_edit[call.from_user.id]
-        status = await chairman_queries_02.change_sp(judId, 2)
+        status = await chairman_queries_02.change_sp(judId, 1)
         if status != 1:
             return await call.answer("❌Ошибка")
         info = await chairman_queries_02.get_jud_info(judId)
