@@ -22,9 +22,8 @@ async def check_list(text, user_id):
 
         # Разбиваем текст сообщения на площадки по переносам строки, у строк с судьями по краям обрезаем переносы/пробелы/точки
         areas = re.split('\n\s{0,}\n', text)
-        have_gs_01 = ['Гс.' in area for area in areas]
         areas_02 = areas.copy()
-        areas = [re.split('Гс.\s{0,}|Згс.\s{0,}|Линейные судьи\s{0,}:\s{0,}|Линейные судьи\s{0,}.\s{0,}', i) for i in areas]
+        areas = [re.split('Гс.?\s{1,}|Згс.?\s{1,}|Линейные судьи\s{0,}.?\s{1,}', i) for i in areas]
         areas = [[i[j].strip().strip('\n').strip('.') for j in range(len(i))] for i in areas]
         sumjudes = []
         new_text = ''
@@ -58,8 +57,8 @@ async def check_list(text, user_id):
                 zgs = []
                 gs = []
                 #print(areas_02[areaindex])
-                if 'Гс.' in areas_02[areaindex] : have_gs = 1
-                if 'Згс.' in areas_02[areaindex]: have_zgs = 1
+                if re.search('Гс.?\s{1,}', areas_02[areaindex]): have_gs = 1
+                if re.search('Згс.?\s{1,}', areas_02[areaindex]): have_zgs = 1
                 if 'Линейные' in areas_02[areaindex]: have_lin = 1
 
                 if have_lin == 1 and have_gs == 1 and have_zgs == 1:
@@ -259,7 +258,7 @@ async def get_parse(text, user_id):
     )
 
     areas = re.split('\n\s{0,}\n', text)
-    areas = [re.split('Гс.\s{0,}|Згс.\s{0,}|Линейные судьи\s{0,}:\s{0,}|Линейные судьи\s{0,}.\s{0,}', i) for i in areas]
+    areas = [re.split('Гс.?\s{1,}|Згс.?\s{1,}|Линейные судьи\s{0,}.?\s{1,}', i) for i in areas]
     areas = [[i[j].strip().strip('\n').strip('.') for j in range(len(i))] for i in areas]
     with conn:
         cur = conn.cursor()
@@ -418,7 +417,7 @@ async def transform_linlist(text, judges, user_id):
 
 async def get_all_judges(text):
     areas = re.split('\n\s{0,}\n', text)
-    areas = [re.split('Гс.\s{0,}|Згс.\s{0,}|Линейные судьи\s{0,}:\s{0,}|Линейные судьи\s{0,}.\s{0,}', i) for i in areas]
+    areas = [re.split('Гс.?\s{1,}|Згс.?\s{1,}|Линейные судьи\s{0,}.?\s{1,}', i) for i in areas]
     areas = [[i[j].strip().strip('\n').strip('.') for j in range(len(i))] for i in areas]
     sumjudes = []
 
