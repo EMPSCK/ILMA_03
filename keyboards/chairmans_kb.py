@@ -549,9 +549,9 @@ async def get_edit_judges_params_mark(compId, user_id):
             cur.execute(
                 f"select firstName, lastName, id, workCode from competition_judges where compId = {compId}")
             group_list = cur.fetchall()
-            encoder = {0: '(Лс)', 1:'(Гс)', 2:'(Згс)', 3:'(Спу)'}
+            encoder = {0: 'ЛC.', 1:'ГС.', 2:'ЗГС.', 3:'СПУ.'}
             for j in range(len(group_list)):
-                but2.append(InlineKeyboardButton(text=f'{encoder[group_list[j]["workCode"]]}{group_list[j]["lastName"]} {group_list[j]["firstName"]}',
+                but2.append(InlineKeyboardButton(text=f'{encoder[group_list[j]["workCode"]]} {group_list[j]["lastName"]} {group_list[j]["firstName"]}',
                                                  callback_data=f'EDIT_JUD_{group_list[j]["id"]}'))
                 if j % 2 != 0:
                     buttons.append(but2)
