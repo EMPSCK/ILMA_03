@@ -31,6 +31,7 @@ generation_results = {}
 async def f2(message: Message):
     user_status = await get_user_status_query.get_user_status(message.from_user.id)
     if user_status == 3 or user_status == 2:
+        await check_list_judges.log(message.from_user.id, message.text)
         try:
             linsets.pop(message.from_user.id, None)
             problemjudgesset_for_check_lin.pop(message.from_user.id, None)

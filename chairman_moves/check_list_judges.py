@@ -474,5 +474,23 @@ async def set_group_counter_for_lin_list(judges, user_id):
 
 
 
-
+async def log(tg_id, text):
+    try:
+        active_comp = await general_queries.get_CompId(tg_id)
+        conn = pymysql.connect(
+            host=config.host,
+            port=3306,
+            user=config.user,
+            password=config.password,
+            database=config.db_name,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        with conn:
+            cur = conn.cursor()
+            cur.execute(f"insert into log_check (text, compId, tgId) values ('{text}', {active_comp}, {tg_id})")
+            conn.commit()
+            return 1
+    except Exception as e:
+        print(e)
+        return 0
 
