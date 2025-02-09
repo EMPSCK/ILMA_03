@@ -382,7 +382,6 @@ async def get_parse(text, user_id):
                     else:
                         if [lastname, firstname] not in judges_problem_db:
                             judges_problem_db.append([lastname, firstname])
-
     return judges_problem, judges_problem_db, text
 
 

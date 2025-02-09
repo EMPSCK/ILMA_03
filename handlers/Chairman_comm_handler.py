@@ -54,6 +54,7 @@ async def f2(message: Message):
         judges_problem, judges_problem_db, text_edit = await check_list_judges.get_parse(message.text, message.from_user.id)
         linsets[message.from_user.id][1] = judges_problem
         text = await check_list_judges.transform_linlist(text_edit, judges_problem_db, message.from_user.id)
+        linsets[message.from_user.id][0] = text
         #Все пробились в competition_judges
         if judges_problem == []:
             res, msg, list_counter = await check_list_judges.check_list(text, message.from_user.id)
@@ -189,8 +190,10 @@ async def edit_linset(callback: types.CallbackQuery):
             problem = f"🤔{', '.join([a1[i][0] +  ' ' + a1[i][1] for i in range(len(a1)) if a2[i] == []])}: не обнаружены в бд. Пожалуйста загрузите дополнительных судей через /judges или отредактируйте сообщение"
             return await Chairman_comm_handler_02.edit_linlist(callback, problem)
 
-        await callback.message.edit_text(text)
+
         res, msg, counter_list = await check_list_judges.check_list(text, callback.from_user.id)
+        text = linsets[callback.from_user.id][0]
+        await callback.message.edit_text(text)
         linsets[callback.from_user.id][3] = msg
         linsets[callback.from_user.id].append(counter_list)
         if res == 1:
